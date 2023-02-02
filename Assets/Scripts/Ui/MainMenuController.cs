@@ -17,10 +17,15 @@ namespace Ui
         {
             _profilePlayer = profilePlayer;
             _view = LoadView(placeForUi);
-            _view.InitStart(StartGame);
-            _view.InitSettings(GoToSettingsMenu);
+            _view.Init(StartGame, GoToSettingsMenu, PlayRewardedAd);
 
             ServiceManager.Instance.AnaliticsService.SendMainMenuOpened();
+            SubscribeAds();
+        }
+
+        protected override void OnDispose()
+        {
+            UnsubscribeAds();
         }
 
         private MainMenuView LoadView(Transform placeForUi)
@@ -37,5 +42,25 @@ namespace Ui
 
         private void GoToSettingsMenu() =>
            _profilePlayer.CurrentState.Value = GameState.Settings;
+
+        private void PlayRewardedAd() =>
+            ServiceManager.Instance.AdsService.RewardedPlayer.Play();
+
+        private void SubscribeAds()
+        {
+            ServiceManager.Instance.AdsService.RewardedPlayer.Finished += OnAdsFinished;
+            ServiceManager.Instance.AdsService.RewardedPlayer.Failed += OnAdsCancelled;
+            ServiceManager.Instance.AdsService.RewardedPlayer.Skipped += OnAdsCancelled;
+        }
+
+        private void UnsubscribeAds()
+        {
+            ServiceManager.Instance.AdsService.RewardedPlayer.Finished -= OnAdsFinished;
+            ServiceManager.Instance.AdsService.RewardedPlayer.Failed -= OnAdsCancelled;
+            ServiceManager.Instance.AdsService.RewardedPlayer.Skipped -= OnAdsCancelled;
+        }
+
+        private void OnAdsFinished() => Debug.Log("Ad finished");
+        private void OnAdsCancelled() => Debug.Log("Ad Cancelled");
     }
 }
