@@ -29,5 +29,11 @@ namespace Services.Analytics
             for (int i = 0; i < _services.Length; i++)
                 _services[i].SendEvent(eventName);
         }
+
+        public void SendTransaction(string productId, decimal amount, string currency)
+        {
+            UnityEngine.Analytics.Analytics.Transaction(productId, amount, currency);
+        }
+
     }
 }
