@@ -32,8 +32,15 @@ namespace Services.Analytics
 
         public void SendTransaction(string productId, decimal amount, string currency)
         {
-            UnityEngine.Analytics.Analytics.Transaction(productId, amount, currency);
+            for (int i = 0; i < _services.Length; i++)
+                _services[i].SendTransaction(productId, amount, currency);
+
+            Log($"Sent transaction {productId}");
         }
 
+        private void Log(string message)
+        {
+            Debug.Log($"[{GetType().Name}] {message}");
+        }
     }
 }
