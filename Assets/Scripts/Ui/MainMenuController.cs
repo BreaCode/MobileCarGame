@@ -11,21 +11,24 @@ namespace Ui
         private readonly ResourcePath _resourcePath = new ResourcePath("Prefabs/MainMenu");
         private readonly ProfilePlayer _profilePlayer;
         private readonly MainMenuView _view;
+        private ServiceManager _services;
 
 
         public MainMenuController(Transform placeForUi, ProfilePlayer profilePlayer)
         {
             _profilePlayer = profilePlayer;
             _view = LoadView(placeForUi);
-            _view.Init(StartGame, GoToSettingsMenu, PlayRewardedAd);
-
-            ServiceManager.Instance.AnaliticsService.SendMainMenuOpened();
+            _view.Init(StartGame, GoToSettingsMenu, PlayRewardedAd, BuyProduct);
+            _services = ServiceManager.Instance;
+            _services.AnaliticsService.SendMainMenuOpened();
             SubscribeAds();
+            SubscribeIAP();
         }
 
         protected override void OnDispose()
         {
             UnsubscribeAds();
+            UnsubscribeIAP();
         }
 
         private MainMenuView LoadView(Transform placeForUi)
@@ -43,24 +46,48 @@ namespace Ui
         private void GoToSettingsMenu() =>
            _profilePlayer.CurrentState.Value = GameState.Settings;
 
-        private void PlayRewardedAd() =>
-            ServiceManager.Instance.AdsService.RewardedPlayer.Play();
+        private void BuyProduct(string productId)
+        {
+            _services.IAPService.Buy(productId);
+        }
 
+        private void PlayRewardedAd() =>
+            _services.AdsService.RewardedPlayer.Play();
+
+        #region Subscribes
         private void SubscribeAds()
         {
-            ServiceManager.Instance.AdsService.RewardedPlayer.Finished += OnAdsFinished;
-            ServiceManager.Instance.AdsService.RewardedPlayer.Failed += OnAdsCancelled;
-            ServiceManager.Instance.AdsService.RewardedPlayer.Skipped += OnAdsCancelled;
+            _services.AdsService.RewardedPlayer.Finished += OnAdsFinished;
+            _services.AdsService.RewardedPlayer.Failed += OnAdsCancelled;
+            _services.AdsService.RewardedPlayer.Skipped += OnAdsCancelled;
         }
 
         private void UnsubscribeAds()
         {
-            ServiceManager.Instance.AdsService.RewardedPlayer.Finished -= OnAdsFinished;
-            ServiceManager.Instance.AdsService.RewardedPlayer.Failed -= OnAdsCancelled;
-            ServiceManager.Instance.AdsService.RewardedPlayer.Skipped -= OnAdsCancelled;
+            _services.AdsService.RewardedPlayer.Finished -= OnAdsFinished;
+            _services.AdsService.RewardedPlayer.Failed -= OnAdsCancelled;
+            _services.AdsService.RewardedPlayer.Skipped -= OnAdsCancelled;
         }
 
+        private void SubscribeIAP()
+        {
+            _services.IAPService.PurchaseSucceed.AddListener(OnPurchaseFinished);
+            _services.IAPService.PurchaseFailed.AddListener(OnPurchaseFailed);
+        }
+
+        private void UnsubscribeIAP()
+        {
+            _services.IAPService.PurchaseSucceed.RemoveAllListeners();
+            _services.IAPService.PurchaseFailed.RemoveAllListeners();
+        }
+        #endregion
+
+        #region Events
         private void OnAdsFinished() => Debug.Log("Ad finished");
         private void OnAdsCancelled() => Debug.Log("Ad Cancelled");
+        private void OnPurchaseFinished() => Debug.Log("Purchase succeed");
+        private void OnPurchaseFailed() => Debug.Log("Purchase failed");
+        #endregion
+
     }
 }
