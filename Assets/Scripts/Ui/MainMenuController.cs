@@ -1,6 +1,7 @@
 using Profile;
 using Tool;
 using UnityEngine;
+using Services;
 using Object = UnityEngine.Object;
 
 namespace Ui
@@ -18,6 +19,8 @@ namespace Ui
             _view = LoadView(placeForUi);
             _view.InitStart(StartGame);
             _view.InitSettings(GoToSettingsMenu);
+
+            ServiceManager.Instance.AnaliticsService.SendMainMenuOpened();
         }
 
         private MainMenuView LoadView(Transform placeForUi)

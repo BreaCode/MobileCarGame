@@ -3,6 +3,7 @@ using Game.InputLogic;
 using Game.TapeBackground;
 using Profile;
 using Tool;
+using Services;
 
 namespace Game
 {
@@ -12,6 +13,8 @@ namespace Game
         {
             var leftMoveDiff = new SubscriptionProperty<float>();
             var rightMoveDiff = new SubscriptionProperty<float>();
+
+            ServiceManager.Instance.AnaliticsService.SendGameStarted();
 
             var tapeBackgroundController = new TapeBackgroundController(leftMoveDiff, rightMoveDiff);
             AddController(tapeBackgroundController);
