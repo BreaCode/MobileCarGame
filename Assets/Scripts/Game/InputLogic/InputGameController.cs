@@ -16,7 +16,7 @@ namespace Game.InputLogic
             CarModel car)
         {
             _view = LoadView();
-            _view.Init(leftMove, rightMove, car.Speed);
+            _view.Init(leftMove, rightMove, car.Speed, car.JumpHeight);
         }
 
         private BaseInputView LoadView()

@@ -29,6 +29,11 @@ namespace Game.InputLogic
                 OnLeftMove(abs);
         }
 
+        private void Jump()
+        {
+            //_jumpHeight;
+        }
+
         private Vector3 CalcDirection()
         {
             const float normalizedMagnitude = 1;
@@ -39,7 +44,10 @@ namespace Game.InputLogic
 
             if (direction.sqrMagnitude > normalizedMagnitude)
                 direction.Normalize();
-
+            if (direction.z > 0)
+            {
+                Jump();
+            }
             return direction;
         }
     }
